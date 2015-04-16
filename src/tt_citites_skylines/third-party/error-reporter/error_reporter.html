@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta http-equiv="MSThemeCompatible" content="Yes">
+
+  <link rel="stylesheet" type="text/css" href="error_reporter.css" />
+
+  <script type="text/javascript" src="jquery.js"></script>
+  <script type="text/javascript" src="error_reporter.js"></script>
+</head>
+<body>
+
+<div id="header">
+  <h1>Oops! An error occurred... <span id="smiley">:(</span></h1>
+</div>
+
+<div id="content">
+  <p>
+    That's embarrassing! An unexpected error occurred.
+  </p>
+  <p>
+    Please submit this error so it can be resolved.
+  </p>
+  <p class="highlight">
+    The developer might need extra information to reproduce the problem,
+    including your email is very useful.
+  </p>
+  <p>
+    <em>Your email will never be shared with third parties!</em>
+  </p>
+  <div>
+    <label for="user_name"><b>Name</b> (Optional)</label>
+    <input type="text" id="user_name">
+  </div>
+  <div>
+    <label for="user_email"><b>Email</b> (Optional)</label>
+    <input type="email" id="user_email">
+  </div>
+  <div>
+    <label for="user_description"><b>Description</b> (Optional)</label>
+    <textarea id="user_description"></textarea>
+  </div>
+</div>
+
+<div id="footer">
+  <a href="#" id="privacy_link">What data is sent?</a>
+  <a href="#" id="more_help">Get more help</a>
+  <button id="submit">Report</button>
+</div>
+
+</body>
+</html>
