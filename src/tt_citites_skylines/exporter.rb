@@ -148,6 +148,19 @@ module TT::Plugins::CitiesSkylinesTools
   end
 
 
+  def self.verify_object_type_count(fbx_data, type, count)
+    objects_filter = /ObjectType:\s+"Model"\s+{\s+Count:\s+(\d+)/
+    result = fbx_data.match(objects_filter)
+    raise PatchError, "Unable to locate Model count" if result.nil?
+    objects = result[1].to_i
+    if objects > 2
+      raise PatchError, "Unexpected number of #{type} objects "\
+          "(#{objects} instead of #{count})"
+    end
+    nil
+  end
+
+
   def self.patch_fbx_file(source, target)
     # Get the asset folder for the game.
     local_app_data = ENV["LOCALAPPDATA"]
@@ -167,6 +180,11 @@ module TT::Plugins::CitiesSkylinesTools
     if fbx_data.start_with?(BINARY_SIGNATURE)
       raise PatchError, "Unexpected FBX in binary format"
     end
+
+    # Validate some of the assumptions being made.
+    self.verify_object_type_count(fbx_data, "Model", 2)
+    self.verify_object_type_count(fbx_data, "Geometry", 1)
+    self.verify_object_type_count(fbx_data, "Material", 1)
 
     # Extract the Connections sections. This isn't strictly needed, but it just
     # narrows the search scope for our other searches.
