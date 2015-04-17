@@ -97,7 +97,29 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   def self.set_fbx_exporter_settings
-    # TODO
+    # Since the model.export method only have export arguments for COLLADA files
+    # and not for any of the other exporters this has to be manually configured
+    # for each system.
+    if Sketchup.platform == :platform_win
+      require "win32/registry"
+      key_sketchup = "Software\\SketchUp\\SketchUp 20#{Sketchup.version.to_i}"
+      key_fbx_exporter = "#{key_sketchup}\\Fbx Exporter"
+      type = Win32::Registry::REG_DWORD
+      access = Win32::Registry::KEY_ALL_ACCESS
+      Win32::Registry::HKEY_CURRENT_USER.open(key_fbx_exporter, access) do |reg|
+        #reg.each_value { |name, type, data| puts "#{name} : #{data}" }
+        reg.write("ExportDoubleSidedFaces",           type, 0)
+        reg.write("ExportSelectionSetOnly",           type, 1)
+        reg.write("ExportSeparateDisconnectedFaces",  type, 0)
+        reg.write("ExportTextureMaps",                type, 0)
+        reg.write("ExportTriangulatedFaces",          type, 1)
+        reg.write("ExportUnits",                      type, 6)
+        reg.write("SwapYZ",                           type, 1)
+      end
+    else
+      # TODO
+    end
+    nil
   end
 
 
