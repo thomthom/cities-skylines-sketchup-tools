@@ -30,10 +30,10 @@ module TT::Plugins::CitiesSkylinesTools
       # TODO: Add Cancel - where No then allows user to provide new filename.
     end
     # Export the intermediate FBX file.
-    self.select_entities_for_export {
-      self.set_fbx_exporter_settings
+    self.set_fbx_exporter_settings
+    source = self.select_entities_for_export {
+      self.export_temp_fbx
     }
-    source = self.export_temp_fbx
     # Try to patch the file so it can be loaded by the game.
     begin
       self.patch_fbx_file(source, target)
@@ -92,7 +92,6 @@ module TT::Plugins::CitiesSkylinesTools
       model.selection.clear
       model.selection.add(original_selection)
     end
-    nil
   end
 
 
