@@ -1,0 +1,48 @@
+# Overview
+
+This is a SketchUp extension for exporting FBX models to be used with
+Colossal Order's Cities: Skylines.
+
+Cities: Skylines uses the Unity engine which require assets to have a flat
+model hierarchy. Unfortunately SketchUp's FBX exporter adds an extra node even
+if all the faces are in the root of the model.
+
+This extension patches the exported FBX model by trying to remove the extra
+node.
+
+It also checks the model for basic requirements before exporting as well as
+setting the FBX exporter required for the asset to be imported correctly.
+
+Additionally it includes a simple tool to layout a 5x5 8m grid to aid in the
+modelling process.
+
+## Beta Version
+
+Note that this is a beta version and might fail to properly patch the exported
+model.
+
+# Requirements
+
+* SketchUp Pro 2014 or newer
+* Windows (OSX support coming soon)
+
+# FBX Exporter Settings
+
+* Export only current selection: true
+* Triangulate all faces: true
+* Export two-sided faces: false
+* Separate disconnected faces: false
+* Export texture maps: false
+* Swap YZ coordinates (Y is up): true
+* Units: Centimeters
+
+## Units
+
+The [wiki](http://www.skylineswiki.com/Asset_Editor) indicate that the units
+should be meters, however, exporting from SketchUp seem to require export units
+set to Centimetres. (It does not matter what your Model Info > Units settings
+are as long as you model 1:1 scale.)
+
+It appear Unity do indeed use meters, but some exporters scale up by 100 by
+default. Unity's default import is therefore set to 0.01 which also appear to be
+the case with Cities: Skylines.
