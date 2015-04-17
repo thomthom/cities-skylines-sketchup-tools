@@ -23,7 +23,7 @@ module TT::Plugins::CitiesSkylinesTools
     target = UI.savepanel("Export FBX Asset", default_path, fbx_filter)
     return false if target.nil?
     # Validate the model before exporting.
-    self.validate_model_for_export
+    triangle_count = self.validate_model_for_export
     # Export the intermediate FBX file.
     self.set_fbx_exporter_settings
     source = self.select_entities_for_export {
@@ -35,6 +35,7 @@ module TT::Plugins::CitiesSkylinesTools
     ensure
       File.delete(source)
     end
+    puts "Exported #{triangle_count} triangles to #{target}"
     true
   rescue ExportError => error
     # Known possible failures is presented via messageboxes.
@@ -88,7 +89,10 @@ module TT::Plugins::CitiesSkylinesTools
     materials = faces.map { |face| face.material }
     materials.uniq!
     raise ExportError, "Only one material can be used" if materials.size > 1
-    nil
+    # Collect triangle count.
+    triangles = 0
+    faces.each { |face| triangles += face.mesh.count_polygons }
+    triangles
   end
 
 
@@ -210,7 +214,6 @@ module TT::Plugins::CitiesSkylinesTools
 
     # Write the patched model to disk.
     File.write(target, fbx_data, encoding: "ASCII-8BIT")
-    puts "Patched file written to: #{target}"
 
     nil
   end
