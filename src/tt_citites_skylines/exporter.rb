@@ -76,7 +76,24 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   def self.validate_model_for_export
-    # TODO
+    model = Sketchup.active_model
+    # Check for instances - ignoring the guide grids.
+    instances = model.entities.select { |entity|
+      (
+        entity.is_a?(Sketchup::Group) ||
+        entity.is_a?(Sketchup::ComponentInstance) ||
+        entity.is_a?(Sketchup::Image)
+      ) && entity.get_attribute(PLUGIN_ID, OBJECT_TYPE).nil?
+    }
+    raise ExportError, "All instances must be exploded" unless instances.empty?
+    # Check there are faces to export.
+    faces = model.entities.grep(Sketchup::Face)
+    raise ExportError, "No faces found to export" if faces.empty?
+    # Check the faces only use one material.
+    materials = faces.map { |face| face.material }
+    materials.uniq!
+    raise ExportError, "Only one material can be used" if materials.size > 1
+    nil
   end
 
 
