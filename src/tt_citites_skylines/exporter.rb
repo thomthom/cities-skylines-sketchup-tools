@@ -133,6 +133,7 @@ module TT::Plugins::CitiesSkylinesTools
       end
     else
       # TODO
+      raise ExportError, "OSX not supported yet"
     end
     nil
   end
