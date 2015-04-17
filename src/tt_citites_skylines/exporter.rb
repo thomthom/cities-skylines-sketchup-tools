@@ -17,18 +17,13 @@ module TT::Plugins::CitiesSkylinesTools
 
   def self.export_asset
     # Find the destination for the asset.
-    target_path = self.find_asset_path
+    default_path = self.find_asset_path
     filename = self.get_model_fbx_name
-    target = File.join(target_path, filename)
+    fbx_filter = "FBX File (*.fbx)|*.fbx||"
+    target = UI.savepanel("Export FBX Asset", default_path, fbx_filter)
+    return false if target.nil?
     # Validate the model before exporting.
     self.validate_model_for_export
-    # Make sure to prompt to overwrite existing files.
-    if File.exist?(target)
-      message = "#{filename} already exist. Would you like to overwrite?"
-      result = UI.messagebox(message, MB_YESNO)
-      return false if result == IDNO
-      # TODO: Add Cancel - where No then allows user to provide new filename.
-    end
     # Export the intermediate FBX file.
     self.set_fbx_exporter_settings
     source = self.select_entities_for_export {
