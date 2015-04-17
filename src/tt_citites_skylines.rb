@@ -27,7 +27,7 @@ module TT
   PLUGIN          = self
   PLUGIN_ID       = "TT_CitiesSkylines".freeze
   PLUGIN_NAME     = "Cities Skylines Tools".freeze
-  PLUGIN_VERSION  = "1.0.0".freeze
+  PLUGIN_VERSION  = "0.1.0".freeze
   PLUGIN_URL      = "http://software.thomthom.net/cities".freeze
 
 
