@@ -48,19 +48,32 @@ module TT::Plugins::CitiesSkylinesTools
   end
 
 
-  def self.find_asset_path
+  def self.win32_find_asset_path
     local_app_data = ENV["LOCALAPPDATA"]
-    raise "Unable to find Local AppData" if local_app_data.nil?
-    # Get the asset folder for the game.
+    return nil if local_app_data.nil?
     local_app_data = File.expand_path(local_app_data)
     game_app_data = File.join(local_app_data, "Colossal Order", "Cities_Skylines")
     asset_path = File.join(game_app_data, "Addons", "Import")
-    # Make sure the destination exist.
-    unless File.exist?(asset_path)
-      raise ExportError, "Asset folder not found: #{asset_path}"
-    end
-    # Everything ok.
     asset_path
+  end
+
+
+  def self.osx_find_asset_path
+    home = ENV["HOME"]
+    return nil if home.nil?
+    app_support = File.join(home, "Library", "Application Support")
+    game_data = File.join(app_support, "Colossal Order", "Cities_Skylines")
+    asset_path = File.join(game_data, "Addons", "Import")
+    asset_path
+  end
+
+
+  def self.find_asset_path
+    if Sketchup.platform == :platform_win
+      self.win32_find_asset_path
+    else
+      self.osx_find_asset_path
+    end
   end
 
 
