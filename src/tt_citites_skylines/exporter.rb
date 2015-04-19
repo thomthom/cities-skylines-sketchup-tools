@@ -154,7 +154,7 @@ module TT::Plugins::CitiesSkylinesTools
   def self.osx_write_settings(section, settings)
     raise TypeError, "Settings must be a Hash" unless settings.is_a?(Hash)
     settings.each { |key, value|
-      reg.write(section, type, value)
+      self.osx_write_setting(section, key, value)
     }
     nil
   end
