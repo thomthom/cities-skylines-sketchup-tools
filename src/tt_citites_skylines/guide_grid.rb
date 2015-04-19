@@ -109,7 +109,7 @@ module TT::Plugins::CitiesSkylinesTools
     cells_subdivs_y = cells_subdivs_y + 1
     cells_subdivs_x.times { |x|
       cells_subdivs_y.times { |y|
-        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0 ])
+        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, (floors - 2) * floor_height.m + first_floor_height.m ])
       }
     }
     
