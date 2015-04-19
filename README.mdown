@@ -46,3 +46,7 @@ are as long as you model 1:1 scale.)
 It appear Unity do indeed use meters, but some exporters scale up by 100 by
 default. Unity's default import is therefore set to 0.01 which also appear to be
 the case with Cities: Skylines.
+
+# License
+
+This project is licensed under the MIT license.
