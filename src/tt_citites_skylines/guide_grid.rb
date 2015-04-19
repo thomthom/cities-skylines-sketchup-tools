@@ -109,8 +109,8 @@ module TT::Plugins::CitiesSkylinesTools
     cells_subdivs_y = cells_subdivs_y + 1
     cells_subdivs_x.times { |x|
       cells_subdivs_y.times { |y|
-        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0 ]) unless height_grid == "Yes"
-        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, (floors - 2) * floor_height.m + first_floor_height.m ]) unless height_grid == "No"
+        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0 ]) if height_grid == "NO" || floors <= 1
+        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, (floors - 2) * floor_height.m + first_floor_height.m ]) unless height_grid == "No" || floors <= 1
       }
     }
     
