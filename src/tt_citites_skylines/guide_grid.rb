@@ -6,34 +6,39 @@
 #-------------------------------------------------------------------------------
 
 module TT::Plugins::CitiesSkylinesTools
-
+    
   SECTOR_SIZE = 8.m
   OBJECT_TYPE = "ObjectType".freeze
   TYPE_GUIDE_GRID = "GuideGrid".freeze
-
+  
   GRID_CELLS_X = "GridCellsX".freeze
   GRID_CELLS_Y = "GridCellsY".freeze
-
-  def self.create_guide_grid(grid_x = nil, grid_y = nil, subdivisions = nil , group = nil)
-    # Prompt user for grid size.
-    prompts = ["Grid Width:", "Grid Depth:", "Subdivisions:"]
-    default_cell_x = grid_x || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
-    default_cell_y = grid_y || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
-    default_cell_subdivisions = subdivisions || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIV, 4)
-    defaults = [default_cell_x, default_cell_y, default_cell_subdivisions]
-    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8", "0|1|2|3"]
+  GRID_CELLS_SUBDIVS = "GridCellsSubDivs".freeze
+  
+  def self.create_guide_grid(grid_x = nil, grid_y = nil, grid_subdivs = nil, group = nil)
+    
+    # Prompt user for grid size/
+    prompts = ["Grid Width:", "Grid Depth:" , "Subdivisions:"]
+    default_cell_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
+    default_cell_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
+    default_cell_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 1)
+    defaults = [default_cell_x, default_cell_y, default_cell_subdivs]
+    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8" , "0|1|2|3"]
     input = UI.inputbox(prompts, defaults, list, "Grid Dimensions")
     return false if input === false
-
+    
+    # Set Vars
     cells_x = input[0]
     cells_y = input[1]
-    subdivisions = input[2]
+    cells_subdivs = input[2]
     grid_lines_x = cells_x + 1
     grid_lines_y = cells_y + 1
+    
+    # Rewrite Sketchup Defaults
     Sketchup.write_default(PLUGIN_ID, GRID_CELLS_X, cells_x)
     Sketchup.write_default(PLUGIN_ID, GRID_CELLS_Y, cells_y)
-    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIV, subdivisions)
-
+    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
+    
     model = Sketchup.active_model
     model.start_operation("Guide Grid")
     group ||= model.entities.add_group
@@ -42,7 +47,7 @@ module TT::Plugins::CitiesSkylinesTools
     group.set_attribute(PLUGIN_ID, OBJECT_TYPE, TYPE_GUIDE_GRID)
     group.set_attribute(PLUGIN_ID, GRID_CELLS_X, cells_x)
     group.set_attribute(PLUGIN_ID, GRID_CELLS_Y, cells_y)
-    group.set_attribute(PLUGIN_ID, GRID_CELLS_SUBDIV, subdivisions)
+    group.set_attribute(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
 
     # Add guide points.
     grid_lines_x.times { |x|
@@ -60,27 +65,29 @@ module TT::Plugins::CitiesSkylinesTools
         group.entities.add_cline(point1, point3) unless y == cells_y
       }
     }
-    # Add SubDivisions
-    subdivisions_x = cells_x
-    subdivisions_y = cells_y
-    subdivision_step = SECTOR_SIZE
-    subdivisions.times { |i|
-      subdivision_step = subdivision_step/2
-      subdivisions_x = subdivisions_x * 2
-      subdivisions_y = subdivisions_y * 2
-    }
-    subdivisions_x = subdivisions_x + 1
-    subdivisions_y = subdivisions_y + 1
     
-    subdivisions_x.times { |x|
-      subdivisions_y.times { |y|
-        group.entities.add_cpoint([x * subdivision_step, y * subdivision_step, 0])
+    # Add SubDivisions
+    cells_subdivs_x = cells_x
+    cells_subdivs_y = cells_y
+    cells_subdivs_step = SECTOR_SIZE
+    cells_subdivs.times { |i|
+      cells_subdivs_step = cells_subdivs_step/2
+      cells_subdivs_x = cells_subdivs_x * 2
+      cells_subdivs_y = cells_subdivs_y * 2
+    }
+    cells_subdivs_x = cells_subdivs_x + 1
+    cells_subdivs_y = cells_subdivs_y + 1
+    
+    cells_subdivs_x.times { |x|
+      cells_subdivs_y.times { |y|
+        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0])
       }
     }
+    
     # Center at origin.
     half_size_x = (SECTOR_SIZE * cells_x) / 2.0
     half_size_y = (SECTOR_SIZE * cells_y) / 2.0
-
+    
     tr = Geom::Transformation.new([-half_size_x, -half_size_y, 0])
     group.transformation = tr
     # Prevent it from easily being moved.
@@ -94,7 +101,6 @@ module TT::Plugins::CitiesSkylinesTools
     ERROR_REPORTER.handle(error)
   end
 
-
   def self.grid_context_menu(context_menu)
     model = Sketchup.active_model
     return false unless model.selection.size == 1
@@ -104,9 +110,10 @@ module TT::Plugins::CitiesSkylinesTools
     return false unless object_type == TYPE_GUIDE_GRID
     grid_x = entity.get_attribute(PLUGIN_ID, GRID_CELLS_X)
     grid_y = entity.get_attribute(PLUGIN_ID, GRID_CELLS_Y)
-    return false if grid_x.nil? || grid_y.nil?
+    grid_subdivs = entity.get_attribute(PLUGIN_ID, GRID_CELLS_SUBDIVS)
+    return false if grid_x.nil? || grid_y.nil? || grid_subdivs.nil?
     context_menu.add_item("Edit Grid") {
-      self.create_guide_grid(grid_x, grid_y, entity)
+      self.create_guide_grid(grid_x, grid_y, grid_subdivs, entity)
     }
     true
   end
