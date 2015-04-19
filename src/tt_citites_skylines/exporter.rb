@@ -134,11 +134,10 @@ module TT::Plugins::CitiesSkylinesTools
     require "win32/registry"
     key_sketchup = "Software\\SketchUp\\SketchUp 20#{Sketchup.version.to_i}"
     key_fbx_exporter = "#{key_sketchup}\\#{section}"
-    type = Win32::Registry::REG_DWORD
     access = Win32::Registry::KEY_ALL_ACCESS
     Win32::Registry::HKEY_CURRENT_USER.open(key_fbx_exporter, access) do |reg|
       settings.each { |key, value|
-        reg.write(key, type, value)
+        reg.write(key, Win32::Registry::REG_DWORD, value)
       }
     end
     nil
