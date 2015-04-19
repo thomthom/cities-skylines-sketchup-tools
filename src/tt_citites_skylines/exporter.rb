@@ -205,18 +205,6 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   def self.patch_fbx_file(source, target)
-    # Get the asset folder for the game.
-    local_app_data = ENV["LOCALAPPDATA"]
-    raise "Unable to find Local AppData" if local_app_data.nil?
-
-    local_app_data = File.expand_path(local_app_data)
-    game_app_data = File.join(local_app_data, "Colossal Order", "Cities_Skylines")
-    asset_path = File.join(game_app_data, "Addons", "Import")
-
-    unless File.exist?(asset_path)
-      raise "Asset folder not found"
-    end
-
     # Read the FBX data. Make sure to read as ASCII to avoid errors in case it's
     # a binary file.
     fbx_data = File.read(source, encoding: "ASCII-8BIT")
