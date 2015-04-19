@@ -19,7 +19,13 @@ module TT::Plugins::CitiesSkylinesTools
     # Find the destination for the asset.
     default_path = self.find_asset_path
     filename = self.get_model_fbx_name
-    fbx_filter = "FBX File (*.fbx)|*.fbx||"
+    if Sketchup.platform == :platform_win
+      fbx_filter = "FBX File (*.fbx)|*.fbx||"
+    else
+      # There appear to be a bug in the OSX version, at least with 10.10 where
+      # the dialog fails to open if the third argument is set.
+      fbx_filter = nil
+    end
     target = UI.savepanel("Export FBX Asset", default_path, fbx_filter)
     return false if target.nil?
     # Validate the model before exporting.
