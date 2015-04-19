@@ -67,8 +67,8 @@ module TT::Plugins::CitiesSkylinesTools
     group.set_attribute(PLUGIN_ID, HEIGHT_GRID, height_grid)
     group.set_attribute(PLUGIN_ID, FLOORS, floors)
     group.set_attribute(PLUGIN_ID, FLOOR_HEIGHT, floor_height)
-    floors = 1 unless default_height_grid == "Yes"
-    floors = floors + 1 if default_height_grid == "Yes"
+    floors = 1 unless height_grid == "Yes"
+    floors = floors + 1 if height_grid == "Yes"
     # Add guide points.
 
     floors.times { |i|
