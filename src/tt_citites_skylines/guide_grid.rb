@@ -11,11 +11,14 @@ module TT::Plugins::CitiesSkylinesTools
   OBJECT_TYPE = "ObjectType".freeze
   TYPE_GUIDE_GRID = "GuideGrid".freeze
 
-  def self.create_guide_grid
-    # Promtp user for grid size/
+  GRID_CELLS_X = "GridCellsX".freeze
+  GRID_CELLS_Y = "GridCellsY".freeze
+
+  def self.create_guide_grid(grid_x = nil, grid_y = nil, group = nil)
+    # Prompt user for grid size.
     prompts = ["Grid Width:", "Grid Depth:"]
-    default_cell_x = Sketchup.read_default(PLUGIN_ID, "GridCellsX", 4)
-    default_cell_y = Sketchup.read_default(PLUGIN_ID, "GridCellsY", 4)
+    default_cell_x = grid_x || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
+    default_cell_y = grid_y || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
     defaults = [default_cell_x, default_cell_y]
     list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8"]
     input = UI.inputbox(prompts, defaults, list, "Grid Dimensions")
@@ -25,14 +28,17 @@ module TT::Plugins::CitiesSkylinesTools
     cells_y = input[1]
     grid_lines_x = cells_x + 1
     grid_lines_y = cells_y + 1
-    Sketchup.write_default(PLUGIN_ID, "GridCellsX", cells_x)
-    Sketchup.write_default(PLUGIN_ID, "GridCellsY", cells_y)
+    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_X, cells_x)
+    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_Y, cells_y)
 
     model = Sketchup.active_model
     model.start_operation("Guide Grid")
-    group = model.entities.add_group
+    group ||= model.entities.add_group
+    group.entities.clear! if group.entities.size > 0
     # Tag this group so we can find it later.
     group.set_attribute(PLUGIN_ID, OBJECT_TYPE, TYPE_GUIDE_GRID)
+    group.set_attribute(PLUGIN_ID, GRID_CELLS_X, cells_x)
+    group.set_attribute(PLUGIN_ID, GRID_CELLS_Y, cells_y)
     # Add guide points.
     grid_lines_x.times { |x|
       grid_lines_y.times { |y|
@@ -54,7 +60,7 @@ module TT::Plugins::CitiesSkylinesTools
     half_size_y = (SECTOR_SIZE * cells_y) / 2.0
 
     tr = Geom::Transformation.new([-half_size_x, -half_size_y, 0])
-    group.transform!(tr)
+    group.transformation = tr
     # Prevent it from easily being moved.
     group.locked = true
     model.commit_operation
@@ -64,6 +70,31 @@ module TT::Plugins::CitiesSkylinesTools
   rescue Exception => error
     model.abort_operation
     ERROR_REPORTER.handle(error)
+  end
+
+
+  def self.grid_context_menu(context_menu)
+    model = Sketchup.active_model
+    return false unless model.selection.size == 1
+    entity = model.selection[0]
+    object_type = entity.get_attribute(PLUGIN_ID, OBJECT_TYPE)
+    return false unless object_type.is_a?(String)
+    return false unless object_type == TYPE_GUIDE_GRID
+    grid_x = entity.get_attribute(PLUGIN_ID, GRID_CELLS_X)
+    grid_y = entity.get_attribute(PLUGIN_ID, GRID_CELLS_Y)
+    return false if grid_x.nil? || grid_y.nil?
+    context_menu.add_item("Edit Grid") {
+      self.create_guide_grid(grid_x, grid_y, entity)
+    }
+    true
+  end
+
+
+  unless file_loaded?(__FILE__)
+    UI.add_context_menu_handler { |context_menu|
+      self.grid_context_menu(context_menu)
+    }
+    file_loaded(__FILE__)
   end
 
 end # module TT::Plugins::CitiesSkylinesTools
