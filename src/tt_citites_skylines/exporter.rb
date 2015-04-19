@@ -124,29 +124,53 @@ module TT::Plugins::CitiesSkylinesTools
   end
 
 
+  def self.win32_write_settings(section, settings)
+    require "win32/registry"
+    key_sketchup = "Software\\SketchUp\\SketchUp 20#{Sketchup.version.to_i}"
+    key_fbx_exporter = "#{key_sketchup}\\#{section}"
+    type = Win32::Registry::REG_DWORD
+    access = Win32::Registry::KEY_ALL_ACCESS
+    Win32::Registry::HKEY_CURRENT_USER.open(key_fbx_exporter, access) do |reg|
+      settings.each { |key, value|
+        reg.write(key, type, value)
+      }
+    end
+    nil
+  end
+
+
+  def self.osx_write_setting(section, key, value)
+    version = "20#{Sketchup.version.to_i}"
+    `defaults write com.sketchup.SketchUp.#{version} "#{section}" -dict-add "#{key}" #{value}`
+  end
+
+
+  def self.osx_write_settings(section, settings)
+    raise TypeError, "Settings must be a Hash" unless settings.is_a?(Hash)
+    settings.each { |key, value|
+      reg.write(section, type, value)
+    }
+    nil
+  end
+
+
   def self.set_fbx_exporter_settings
     # Since the model.export method only have export arguments for COLLADA files
     # and not for any of the other exporters this has to be manually configured
     # for each system.
+    settings = {
+     "ExportDoubleSidedFaces"            => 0,
+      "ExportSelectionSetOnly"           => 1,
+      "ExportSeparateDisconnectedFaces"  => 0,
+      "ExportTextureMaps"                => 0,
+      "ExportTriangulatedFaces"          => 1,
+      "ExportUnits"                      => 6,
+      "SwapYZ"                           => 1
+    }
     if Sketchup.platform == :platform_win
-      require "win32/registry"
-      key_sketchup = "Software\\SketchUp\\SketchUp 20#{Sketchup.version.to_i}"
-      key_fbx_exporter = "#{key_sketchup}\\Fbx Exporter"
-      type = Win32::Registry::REG_DWORD
-      access = Win32::Registry::KEY_ALL_ACCESS
-      Win32::Registry::HKEY_CURRENT_USER.open(key_fbx_exporter, access) do |reg|
-        #reg.each_value { |name, type, data| puts "#{name} : #{data}" }
-        reg.write("ExportDoubleSidedFaces",           type, 0)
-        reg.write("ExportSelectionSetOnly",           type, 1)
-        reg.write("ExportSeparateDisconnectedFaces",  type, 0)
-        reg.write("ExportTextureMaps",                type, 0)
-        reg.write("ExportTriangulatedFaces",          type, 1)
-        reg.write("ExportUnits",                      type, 6)
-        reg.write("SwapYZ",                           type, 1)
-      end
+      self.win32_write_settings("Fbx Exporter", settings)
     else
-      # TODO
-      raise ExportError, "OSX not supported yet"
+      self.osx_write_settings("Fbx Exporter", settings)
     end
     nil
   end
