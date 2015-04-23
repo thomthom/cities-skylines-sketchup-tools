@@ -30,21 +30,61 @@ module TT::Plugins::CitiesSkylinesTools
       self.create_guide_grid
     }
     cmd.tooltip = "Create Guide Grid"
-    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid-24.png")
+    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_cfg-16.png")
+    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_cfg-24.png")
     cmd_create_guide_grid = cmd
+    
+    cmd = UI::Command.new("Increase Subdivision Level") {
+      self.guide_grid_subdiv_level("Inc")
+    }
+    cmd.tooltip = "Increase Subdivision Level"
+    cmd.small_icon = File.join(PATH_IMAGES, "-16.png")
+    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_inc-24.png")
+    cmd_guide_grid_subdiv_level_inc = cmd
+    
+    cmd = UI::Command.new("Decrease Subdivision Level") {
+      self.guide_grid_subdiv_level("Dec")
+    }
+    cmd.tooltip = "Decrease Subdivision Level"
+    cmd.small_icon = File.join(PATH_IMAGES, "-16.png")
+    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_dec-24.png")
+    cmd_guide_grid_subdiv_level_dec = cmd
 
-    # Menus
 
+    cmd = UI::Command.new("One Floor Up") {
+      self.guide_grid_height_level("Up")
+    }
+    cmd.tooltip = "One Floor Up"
+    #cmd.small_icon = File.join(PATH_IMAGES, "-16.png")
+    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_level_inc-24.png")
+    cmd_guide_grid_height_level_up = cmd
+    
+    cmd = UI::Command.new("One Floor Down") {
+      self.guide_grid_height_level("Down")
+    }
+    cmd.tooltip = "One Floor Down"
+    #cmd.small_icon = File.join(PATH_IMAGES, "-16.png")
+    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_level_dec-24.png")
+    cmd_guide_grid_height_level_down = cmd
+    
+    
+   # Menus
     menu = UI.menu("Plugins").add_submenu(PLUGIN_NAME)
     menu.add_item(cmd_create_guide_grid)
+    menu.add_item(cmd_guide_grid_subdiv_level_inc)
+    menu.add_item(cmd_guide_grid_subdiv_level_dec)
+    menu.add_item(cmd_guide_grid_height_level_up)
+    menu.add_item(cmd_guide_grid_height_level_down)
     menu.add_separator
     menu.add_item(cmd_export_asset)
 
     # Toolbar
-
     toolbar = UI::Toolbar.new(PLUGIN_NAME)
     toolbar.add_item(cmd_create_guide_grid)
+    toolbar.add_item(cmd_guide_grid_subdiv_level_inc)
+    toolbar.add_item(cmd_guide_grid_subdiv_level_dec)
+    toolbar.add_item(cmd_guide_grid_height_level_up)
+    toolbar.add_item(cmd_guide_grid_height_level_down)
     toolbar.add_item(cmd_export_asset)
     toolbar.restore
 

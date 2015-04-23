@@ -17,10 +17,11 @@ module TT::Plugins::CitiesSkylinesTools
   FLOORS = "Floors".freeze
   FIRST_FLOOR_HEIGHT = "FirstFloorHeight".freeze
   FLOOR_HEIGHT = "FloorHeight".freeze
-
+  
+  
   def self.create_guide_grid(cells_x = nil, cells_y = nil, cells_subdivs = nil, height_grid = nil, floors = nil, first_floor_height = nil , floor_height = nil, group = nil)
   
-    self.guide_grid_config(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group) unless cells_subdivs || floor_height
+    self.guide_grid_config(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group) unless cells_subdivs
 
     cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4) unless cells_x
     cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4) unless cells_y
@@ -150,7 +151,7 @@ module TT::Plugins::CitiesSkylinesTools
     default_first_floor_height = first_floor_height || Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
       
     defaults = [default_cell_x, default_cell_y, default_cell_subdivs, default_height_grid, default_floors, default_first_floor_height, default_floor_height]
-    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8" , "0|1|2|3", "No|Yes", "", "", ""]
+    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8" , "0|1|2|3|4", "No|Yes", "", "", ""]
     input = UI.inputbox(prompts, defaults, list, "Grid Dimensions")
     return false if input === false
       
@@ -171,7 +172,71 @@ module TT::Plugins::CitiesSkylinesTools
     Sketchup.write_default(PLUGIN_ID, FLOORS, floors)
     Sketchup.write_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, first_floor_height)
     Sketchup.write_default(PLUGIN_ID, FLOOR_HEIGHT, floor_height)
+
+  end
+
+  def self.guide_grid_subdiv_level(dir = nil)
+    # Find group if possible else create a new one
+    model = Sketchup.active_model
+    entities = Sketchup.active_model.entities
+    if (entities)
+      entities.each{|g|
+        if g.get_attribute(PLUGIN_ID, OBJECT_TYPE) == TYPE_GUIDE_GRID
+          group=g
+          cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
+          cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
+            
+          if (dir === "Inc")
+            cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)+1
+            cells_subdivs = 4 if cells_subdivs > 4
+            Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
+          else
+            cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)-1
+            cells_subdivs = 0 if cells_subdivs < 0
+            Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
+          end
+          # Height
+          height_grid = Sketchup.read_default(PLUGIN_ID, HEIGHT_GRID, "No")
+          floors = Sketchup.read_default(PLUGIN_ID, FLOORS, 5)
+          floor_height = Sketchup.read_default(PLUGIN_ID, FLOOR_HEIGHT, 3)
+          first_floor_height = Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
+          self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group)
+        end
+      }
+    end
     true
+  end
+
+  def self.guide_grid_height_level(dir = nil)
+    # Find group if possible else create a new one
+    model = Sketchup.active_model
+    entities = Sketchup.active_model.entities
+    if (entities)
+      entities.each{|g|
+        if g.get_attribute(PLUGIN_ID, OBJECT_TYPE) == TYPE_GUIDE_GRID
+          group=g
+          cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
+          cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
+          cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)
+          # Height
+          height_grid = Sketchup.read_default(PLUGIN_ID, HEIGHT_GRID, "No")
+          
+          if (dir === "Up")
+            floors = Sketchup.read_default(PLUGIN_ID, FLOORS, 5)+1
+            floors = 999 if floors >= 999
+            Sketchup.write_default(PLUGIN_ID, FLOORS, floors)
+           else
+            floors = Sketchup.read_default(PLUGIN_ID, FLOORS, 5)-1
+            floors = 0 if floors <= 0
+            Sketchup.write_default(PLUGIN_ID, FLOORS, floors)
+          end
+          floor_height = Sketchup.read_default(PLUGIN_ID, FLOOR_HEIGHT, 3)
+          first_floor_height = Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
+          self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group)
+        end
+      }
+    end
+    false
   end
 
   unless file_loaded?(__FILE__)
