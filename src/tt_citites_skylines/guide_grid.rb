@@ -20,9 +20,6 @@ module TT::Plugins::CitiesSkylinesTools
   
   
   def self.create_guide_grid(cells_x = nil, cells_y = nil, cells_subdivs = nil, height_grid = nil, floors = nil, first_floor_height = nil , floor_height = nil, group = nil)
-  
-    self.guide_grid_config(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group) unless cells_subdivs
-
     cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4) unless cells_x
     cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4) unless cells_y
     cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3) unless cells_subdivs
@@ -94,7 +91,7 @@ module TT::Plugins::CitiesSkylinesTools
     # Create Points
     cells_subdivs_x.times { |x|
       cells_subdivs_y.times { |y|
-        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0 ]) if height_grid == "NO" || floors <= 1
+        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0 ]) if height_grid == "No" || floors <= 1
         group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, (floors - 2) * floor_height.m + first_floor_height.m ]) unless height_grid == "No" || floors <= 1
       }
     }
@@ -151,8 +148,8 @@ module TT::Plugins::CitiesSkylinesTools
     default_first_floor_height = first_floor_height || Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
       
     defaults = [default_cell_x, default_cell_y, default_cell_subdivs, default_height_grid, default_floors, default_first_floor_height, default_floor_height]
-    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8" , "0|1|2|3|4", "No|Yes", "", "", ""]
-    input = UI.inputbox(prompts, defaults, list, "Grid Dimensions")
+    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8" , "0|1|2|3", "No|Yes", "", "", ""]
+    input = UI.inputbox(prompts, defaults, list, "Guide Grid Config")
     return false if input === false
       
     # Update Vars
@@ -172,16 +169,19 @@ module TT::Plugins::CitiesSkylinesTools
     Sketchup.write_default(PLUGIN_ID, FLOORS, floors)
     Sketchup.write_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, first_floor_height)
     Sketchup.write_default(PLUGIN_ID, FLOOR_HEIGHT, floor_height)
-
+    self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group)
+    true
   end
 
   def self.guide_grid_subdiv_level(dir = nil)
     # Find group if possible else create a new one
     model = Sketchup.active_model
     entities = Sketchup.active_model.entities
+    found = false
     if (entities)
       entities.each{|g|
         if g.get_attribute(PLUGIN_ID, OBJECT_TYPE) == TYPE_GUIDE_GRID
+          found=true
           group=g
           cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
           cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
@@ -204,6 +204,7 @@ module TT::Plugins::CitiesSkylinesTools
         end
       }
     end
+    false unless found === true
     true
   end
 
@@ -211,16 +212,17 @@ module TT::Plugins::CitiesSkylinesTools
     # Find group if possible else create a new one
     model = Sketchup.active_model
     entities = Sketchup.active_model.entities
+    found = false
     if (entities)
       entities.each{|g|
         if g.get_attribute(PLUGIN_ID, OBJECT_TYPE) == TYPE_GUIDE_GRID
+          found=true
           group=g
           cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
           cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
           cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)
           # Height
           height_grid = Sketchup.read_default(PLUGIN_ID, HEIGHT_GRID, "No")
-          
           if (dir === "Up")
             floors = Sketchup.read_default(PLUGIN_ID, FLOORS, 5)+1
             floors = 999 if floors >= 999
@@ -232,11 +234,12 @@ module TT::Plugins::CitiesSkylinesTools
           end
           floor_height = Sketchup.read_default(PLUGIN_ID, FLOOR_HEIGHT, 3)
           first_floor_height = Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
-          self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group)
+          self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, nil)
         end
       }
     end
-    false
+    false unless found === true
+    true
   end
 
   unless file_loaded?(__FILE__)
