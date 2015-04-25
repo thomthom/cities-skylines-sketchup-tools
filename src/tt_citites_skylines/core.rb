@@ -11,6 +11,7 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   require "tt_citites_skylines/exporter.rb"
+  require "tt_citites_skylines/exporter_dae.rb"
   require "tt_citites_skylines/guide_grid.rb"
 
 
@@ -19,10 +20,10 @@ module TT::Plugins::CitiesSkylinesTools
     toolbar = UI::Toolbar.new(PLUGIN_NAME)
 
     # Commands
-    toolbaritems = ["Export Asset", "Guide Grid Config", "Increase Subdivision Level", "Decrease Subdivision Level", "One Floor Up", "One Floor Down" ]
-    toolbaritemicons = ["export", "guide_grid_cfg", "guide_grid_subdiv_inc", "guide_grid_subdiv_dec", "guide_grid_level_inc", "guide_grid_level_dec"]
-    toolbaritemmethods = ["export_asset", "guide_grid_config", "guide_grid_subdiv_level", "guide_grid_subdiv_level", "guide_grid_height_level", "guide_grid_height_level"]
-    toolbaritemparams = [ nil,  nil, "Inc", "Dec", "Up", "Down"]
+    toolbaritems = ["Export CSL FBX", "Export CSL DAE", "Guide Grid Config", "Increase Subdivision Level", "Decrease Subdivision Level", "One Floor Up", "One Floor Down" ]
+    toolbaritemicons = ["export_fbx", "export_dae", "guide_grid_cfg", "guide_grid_subdiv_inc", "guide_grid_subdiv_dec", "guide_grid_level_inc", "guide_grid_level_dec"]
+    toolbaritemmethods = ["export_asset","export_asset_dae", "guide_grid_config", "guide_grid_subdiv_level", "guide_grid_subdiv_level", "guide_grid_height_level", "guide_grid_height_level"]
+    toolbaritemparams = [ nil, nil,  nil, "Inc", "Dec", "Up", "Down"]
     
     toolbaritems.each_with_index {|val, index|
       cmd = UI::Command.new(val) {
