@@ -24,7 +24,7 @@ model.
 # Requirements
 
 * SketchUp Pro 2014 or newer
-* Windows (OSX support coming soon)
+* Windows or OS X
 
 # FBX Exporter Settings
 
