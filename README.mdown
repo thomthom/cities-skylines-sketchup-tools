@@ -36,6 +36,20 @@ model.
 * Swap YZ coordinates (Y is up): true
 * Units: Centimeters
 
+# DAE Exporter Settings
+
+Note: During export the Model will be scaled and rotated to fit the ingame needs!
+
+* Export two-sided faces: false
+* Export edges: false
+* Triangulate all faces: true
+* Export only current selection: true
+* Export Hidden Geometry: false
+* Preserve Component Hierarchies: false
+* Export Texture Maps: true
+* Preserve Credits: false 
+
+
 ## Units
 
 The [wiki](http://www.skylineswiki.com/Asset_Editor) indicate that the units
