@@ -128,7 +128,7 @@ module TT::Plugins::CitiesSkylinesTools
     floor_height = entity.get_attribute(PLUGIN_ID, FLOOR_HEIGHT)
     return false if grid_x.nil? || grid_y.nil? || grid_subdivs.nil?
     context_menu.add_item("Edit Grid") {
-      self.create_guide_grid(grid_x, grid_y, grid_subdivs, height_grid, floors, first_floor_height, floor_height, entity)
+      self.guide_grid_config(grid_x, grid_y, grid_subdivs, height_grid, floors, first_floor_height, floor_height, entity)
     }
     true
   end
