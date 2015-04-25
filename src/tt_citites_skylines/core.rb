@@ -15,79 +15,27 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   unless file_loaded?(__FILE__)
+    menu = UI.menu("Plugins").add_submenu(PLUGIN_NAME)
+    toolbar = UI::Toolbar.new(PLUGIN_NAME)
 
     # Commands
-
-    cmd = UI::Command.new("Export Asset") {
-      self.export_asset
-    }
-    cmd.tooltip = "Export Asset"
-    cmd.small_icon = File.join(PATH_IMAGES, "export-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "export-24.png")
-    cmd_export_asset = cmd
-
-    cmd = UI::Command.new("Create Guide Grid") {
-      self.guide_grid_config
-    }
-    cmd.tooltip = "Create Guide Grid"
-    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_cfg-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_cfg-24.png")
-    cmd_create_guide_grid = cmd
+    toolbaritems = ["Export Asset", "Guide Grid Config", "Increase Subdivision Level", "Decrease Subdivision Level", "One Floor Up", "One Floor Down" ]
+    toolbaritemicons = ["export", "guide_grid_cfg", "guide_grid_subdiv_inc", "guide_grid_subdiv_dec", "guide_grid_level_inc", "guide_grid_level_dec"]
+    toolbaritemmethods = ["export_asset", "guide_grid_config", "guide_grid_subdiv_level", "guide_grid_subdiv_level", "guide_grid_height_level", "guide_grid_height_level"]
+    toolbaritemparams = [ nil,  nil, "Inc", "Dec", "Up", "Down"]
     
-    cmd = UI::Command.new("Increase Subdivision Level") {
-      self.guide_grid_subdiv_level("Inc")
+    toolbaritems.each_with_index {|val, index|
+      cmd = UI::Command.new(val) {
+        self.send(toolbaritemmethods[index],toolbaritemparams[index]) unless toolbaritemparams[index].nil?
+        self.send(toolbaritemmethods[index]) if toolbaritemparams[index].nil?
+      }
+      cmd.tooltip = val
+      cmd.small_icon = File.join(PATH_IMAGES, toolbaritemicons[index]+"-16.png")
+      cmd.large_icon = File.join(PATH_IMAGES, toolbaritemicons[index]+"-24.png")
+      menu.add_item(cmd)
+      toolbar.add_item(cmd)
     }
-    cmd.tooltip = "Increase Subdivision Level"
-    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_inc-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_inc-24.png")
-    cmd_guide_grid_subdiv_level_inc = cmd
-    
-    cmd = UI::Command.new("Decrease Subdivision Level") {
-      self.guide_grid_subdiv_level("Dec")
-    }
-    cmd.tooltip = "Decrease Subdivision Level"
-    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_dec-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_dec-24.png")
-    cmd_guide_grid_subdiv_level_dec = cmd
-
-
-    cmd = UI::Command.new("One Floor Up") {
-      self.guide_grid_height_level("Up")
-    }
-    cmd.tooltip = "One Floor Up"
-    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_level_inc-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_level_inc-24.png")
-    cmd_guide_grid_height_level_up = cmd
-    
-    cmd = UI::Command.new("One Floor Down") {
-      self.guide_grid_height_level("Down")
-    }
-    cmd.tooltip = "One Floor Down"
-    cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_level_dec-16.png")
-    cmd.large_icon = File.join(PATH_IMAGES, "guide_grid_level_dec-24.png")
-    cmd_guide_grid_height_level_down = cmd
-    
-    
-   # Menus
-    menu = UI.menu("Plugins").add_submenu(PLUGIN_NAME)
-    menu.add_item(cmd_create_guide_grid)
-    menu.add_item(cmd_guide_grid_subdiv_level_inc)
-    menu.add_item(cmd_guide_grid_subdiv_level_dec)
-    menu.add_item(cmd_guide_grid_height_level_up)
-    menu.add_item(cmd_guide_grid_height_level_down)
-    menu.add_separator
-    menu.add_item(cmd_export_asset)
-
-    # Toolbar
-    toolbar = UI::Toolbar.new(PLUGIN_NAME)
-    toolbar.add_item(cmd_create_guide_grid)
-    toolbar.add_item(cmd_guide_grid_subdiv_level_inc)
-    toolbar.add_item(cmd_guide_grid_subdiv_level_dec)
-    toolbar.add_item(cmd_guide_grid_height_level_up)
-    toolbar.add_item(cmd_guide_grid_height_level_down)
-    toolbar.add_item(cmd_export_asset)
     toolbar.restore
-
     file_loaded(__FILE__)
   end
 
