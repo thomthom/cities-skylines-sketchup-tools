@@ -1,11 +1,11 @@
 # Overview
 
-This is a SketchUp extension for exporting FBX models to be used with
+This is a SketchUp extension for exporting FBX or Collada models to be used with
 Colossal Order's Cities: Skylines.
 
 Cities: Skylines uses the Unity engine which require assets to have a flat
 model hierarchy. Unfortunately SketchUp's FBX exporter adds an extra node even
-if all the faces are in the root of the model.
+if all the faces are in the root of the model. 
 
 This extension patches the exported FBX model by trying to remove the extra
 node.
@@ -13,8 +13,10 @@ node.
 It also checks the model for basic requirements before exporting as well as
 setting the FBX exporter required for the asset to be imported correctly.
 
-Additionally it includes a simple tool to layout a 5x5 8m grid to aid in the
-modelling process.
+Exported Collada files will import rotated and scaled. This extension will
+fix this during export.
+
+Additionally it includes a tool to layout a grid to aid in the modelling process.
 
 ## Beta Version
 
