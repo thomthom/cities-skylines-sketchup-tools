@@ -135,7 +135,7 @@ module TT::Plugins::CitiesSkylinesTools
     key_sketchup = "Software\\SketchUp\\SketchUp 20#{Sketchup.version.to_i}"
     key_fbx_exporter = "#{key_sketchup}\\#{section}"
     access = Win32::Registry::KEY_ALL_ACCESS
-    Win32::Registry::HKEY_CURRENT_USER.open(key_fbx_exporter, access) do |reg|
+    Win32::Registry::HKEY_CURRENT_USER.create(key_fbx_exporter, access) do |reg|
       settings.each { |key, value|
         dword = case value
         when Integer
