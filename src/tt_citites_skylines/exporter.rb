@@ -162,7 +162,7 @@ module TT::Plugins::CitiesSkylinesTools
     else
       raise "#{value.class} not supported"
     end
-    `defaults write com.sketchup.SketchUp.#{version} "#{section}" -dict-add "#{key}" #{value}`
+    `defaults write com.sketchup.SketchUp.#{version} "#{section}" -dict-add "#{key}" #{value_with_type}`
   end
 
 
