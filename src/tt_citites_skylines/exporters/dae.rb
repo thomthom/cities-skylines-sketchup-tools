@@ -32,33 +32,15 @@ module TT::Plugins::CitiesSkylinesTools
       :selectionset_only    => true
     }
 
+    tr_scale = Geom::Transformation.scaling(ORIGIN, 2.54)
+    tr_axes = Geom::Transformation.axes(ORIGIN, X_AXIS, Z_AXIS, Y_AXIS)
+    tr = tr_axes * tr_scale
+
     model = Sketchup.active_model
-    zeroPoint = Geom::Point3d.new
-    v1 = Geom::Vector3d.new 0,1,0
-    # Rotate and Scale
-    t_scale = Geom::Transformation.scaling(zeroPoint, 2.54) # 3D
-    v2 = Geom::Vector3d.new 0,0,-1
-    angle = v1.angle_between(v2)
-    ts = 1.0 / t_scale.to_a[15]
-    ta = t_scale.to_a.collect { |d| d * ts }
-    t_scale = Geom::Transformation.new(ta)
-    v3 = v1 * v2
-    t_rotation = Geom::Transformation.rotation(zeroPoint, v3, angle)
-    t = t_rotation * t_scale
-    model.active_entities.transform_entities(t, model.selection)
-    # Export
+    model.start_operation("COLLADA Export", true)
+    model.active_entities.transform_entities(tr, model.entities.to_a)
     model.export(target, options)
-    # Reset
-    t_scale = Geom::Transformation.scaling(zeroPoint, 1/2.54) # 3D
-    v2 = Geom::Vector3d.new 0,0,1
-    angle = v1.angle_between(v2)
-    ts = 1.0 / t_scale.to_a[15]
-    ta = t_scale.to_a.collect { |d| d * ts }
-    t_scale = Geom::Transformation.new(ta)
-    v3 = v1 * v2
-    t_rotation = Geom::Transformation.rotation(zeroPoint, v3, angle)
-    t = t_rotation * t_scale
-    model.active_entities.transform_entities(t, model.selection)
+    model.abort_operation
   end
 
 end # module TT::Plugins::CitiesSkylinesTools
