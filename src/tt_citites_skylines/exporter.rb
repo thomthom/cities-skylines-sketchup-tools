@@ -135,9 +135,17 @@ module TT::Plugins::CitiesSkylinesTools
     key_sketchup = "Software\\SketchUp\\SketchUp 20#{Sketchup.version.to_i}"
     key_fbx_exporter = "#{key_sketchup}\\#{section}"
     access = Win32::Registry::KEY_ALL_ACCESS
-    Win32::Registry::HKEY_CURRENT_USER.open(key_fbx_exporter, access) do |reg|
+    Win32::Registry::HKEY_CURRENT_USER.create(key_fbx_exporter, access) do |reg|
       settings.each { |key, value|
-        reg.write(key, Win32::Registry::REG_DWORD, value)
+        dword = case value
+        when Integer
+          value
+        when TrueClass, FalseClass
+          value ? 1 : 0
+        else
+          raise "#{value.class} not supported"
+        end
+        reg.write(key, Win32::Registry::REG_DWORD, dword)
       }
     end
     nil
@@ -146,7 +154,15 @@ module TT::Plugins::CitiesSkylinesTools
 
   def self.osx_write_setting(section, key, value)
     version = "20#{Sketchup.version.to_i}"
-    `defaults write com.sketchup.SketchUp.#{version} "#{section}" -dict-add "#{key}" #{value}`
+    value_with_type = case value
+    when Integer
+      "-int #{value}"
+    when TrueClass, FalseClass
+      "-bool #{value}"
+    else
+      raise "#{value.class} not supported"
+    end
+    `defaults write com.sketchup.SketchUp.#{version} "#{section}" -dict-add "#{key}" #{value_with_type}`
   end
 
 
@@ -164,13 +180,13 @@ module TT::Plugins::CitiesSkylinesTools
     # and not for any of the other exporters this has to be manually configured
     # for each system.
     settings = {
-     "ExportDoubleSidedFaces"            => 0,
-      "ExportSelectionSetOnly"           => 1,
-      "ExportSeparateDisconnectedFaces"  => 0,
-      "ExportTextureMaps"                => 0,
-      "ExportTriangulatedFaces"          => 1,
+      "ExportDoubleSidedFaces"           => false,
+      "ExportSelectionSetOnly"           => true,
+      "ExportSeparateDisconnectedFaces"  => false,
+      "ExportTextureMaps"                => false,
+      "ExportTriangulatedFaces"          => true,
       "ExportUnits"                      => 6,
-      "SwapYZ"                           => 1
+      "SwapYZ"                           => true
     }
     if Sketchup.platform == :platform_win
       self.win32_write_settings("Fbx Exporter", settings)
