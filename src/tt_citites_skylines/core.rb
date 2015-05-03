@@ -95,7 +95,7 @@ module TT::Plugins::CitiesSkylinesTools
   def self.reload( tt_lib = false )
     original_verbose = $VERBOSE
     $VERBOSE = nil
-    ruby_files = File.join(PATH, '*.{rb,rbs}')
+    ruby_files = File.join(PATH, '**/*.{rb,rbs}')
     x = Dir.glob(ruby_files).each { |file|
       load file
     }
