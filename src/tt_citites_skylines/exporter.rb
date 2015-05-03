@@ -7,6 +7,7 @@
 
 module TT::Plugins::CitiesSkylinesTools
 
+  class ValidationError < StandardError; end
   class ExportError < StandardError; end
 
 
@@ -14,6 +15,8 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   def self.export_asset
+    # Validate the model before exporting.
+    triangle_count = self.validate_model_for_export
     # Find the destination for the asset.
     default_path = self.find_asset_path
     filename = self.get_model_fbx_name
@@ -26,14 +29,16 @@ module TT::Plugins::CitiesSkylinesTools
     end
     target = UI.savepanel("Export Asset", default_path, fbx_filter)
     return false if target.nil?
-    # Validate the model before exporting.
-    triangle_count = self.validate_model_for_export
     # Export the asset.
     self.export_fbx_asset(target)
     puts "Exported #{triangle_count} triangles to #{target}"
     true
-  rescue ExportError => error
+  rescue ValidationError => error
     # Known possible failures is presented via messageboxes.
+    message = "Cannot export asset.\n\n#{error.message}"
+    UI.messagebox(message)
+    false
+  rescue ExportError => error
     message = "Failed to export asset.\n\n#{error.message}"
     UI.messagebox(message)
     false
@@ -89,14 +94,14 @@ module TT::Plugins::CitiesSkylinesTools
         entity.is_a?(Sketchup::Image)
       ) && entity.get_attribute(PLUGIN_ID, OBJECT_TYPE).nil?
     }
-    raise ExportError, "All instances must be exploded" unless instances.empty?
+    raise ValidationError, "All instances must be exploded" unless instances.empty?
     # Check there are faces to export.
     faces = model.entities.grep(Sketchup::Face)
-    raise ExportError, "No faces found to export" if faces.empty?
+    raise ValidationError, "No faces found to export" if faces.empty?
     # Check the faces only use one material.
     materials = faces.map { |face| face.material }
     materials.uniq!
-    raise ExportError, "Only one material can be used" if materials.size > 1
+    raise ValidationError, "Only one material can be used" if materials.size > 1
     # Collect triangle count.
     triangles = 0
     faces.each { |face| triangles += face.mesh.count_polygons }
