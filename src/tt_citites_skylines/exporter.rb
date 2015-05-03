@@ -12,6 +12,7 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   require "tt_citites_skylines/exporters/fbx.rb"
+  require "tt_citites_skylines/exporters/dae.rb"
 
 
   def self.export_asset

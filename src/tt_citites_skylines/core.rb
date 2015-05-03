@@ -11,7 +11,6 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   require "tt_citites_skylines/exporter.rb"
-  require "tt_citites_skylines/exporter_dae.rb"
   require "tt_citites_skylines/guide_grid.rb"
 
 
