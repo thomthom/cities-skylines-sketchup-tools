@@ -19,18 +19,29 @@ module TT::Plugins::CitiesSkylinesTools
     triangle_count = self.validate_model_for_export
     # Find the destination for the asset.
     default_path = self.find_asset_path
-    filename = self.get_model_fbx_name
     if Sketchup.platform == :platform_win
-      fbx_filter = "FBX File (*.fbx)|*.fbx||"
+      file_filter = "FBX File (*.fbx)|*.fbx|COLLADA File (*.dae)|*.dae||"
     else
       # There appear to be a bug in the OSX version, at least with 10.10 where
       # the dialog fails to open if the third argument is set.
-      fbx_filter = nil
+      file_filter = nil
     end
-    target = UI.savepanel("Export Asset", default_path, fbx_filter)
+    target = UI.savepanel("Export Asset", default_path, file_filter)
     return false if target.nil?
     # Export the asset.
-    self.export_fbx_asset(target)
+    extension = File.extname(target.downcase)
+    case extension
+    when ".fbx"
+      if Sketchup.is_pro?
+        self.export_fbx_asset(target)
+      else
+        raise ExportError, "FBX export is a SketchUp Pro feature"
+      end
+    when ".dae"
+      self.export_asset_dae(target)
+    else
+      raise ExportError, "Unsupported file extension (#{extension})"
+    end
     puts "Exported #{triangle_count} triangles to #{target}"
     true
   rescue ValidationError => error
