@@ -27,6 +27,7 @@ module TT::Plugins::CitiesSkylinesTools
       # the dialog fails to open if the third argument is set.
       file_filter = nil
     end
+    # TODO: Probably be good to remember the last used filetype.
     target = UI.savepanel("Export Asset", default_path, file_filter)
     return false if target.nil?
     # Export the asset.
