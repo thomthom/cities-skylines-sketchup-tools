@@ -5,7 +5,7 @@ Colossal Order's Cities: Skylines.
 
 Cities: Skylines uses the Unity engine which require assets to have a flat
 model hierarchy. Unfortunately SketchUp's FBX exporter adds an extra node even
-if all the faces are in the root of the model. 
+if all the faces are in the root of the model.
 
 This extension patches the exported FBX model by trying to remove the extra
 node.
@@ -40,7 +40,8 @@ model.
 
 # DAE Exporter Settings
 
-Note: During export the Model will be scaled and rotated to fit the ingame needs!
+Note: During export the Model will be scaled and rotated to fit the in-game
+needs!
 
 * Export two-sided faces: false
 * Export edges: false
@@ -49,7 +50,7 @@ Note: During export the Model will be scaled and rotated to fit the ingame needs
 * Export Hidden Geometry: false
 * Preserve Component Hierarchies: false
 * Export Texture Maps: true
-* Preserve Credits: false 
+* Preserve Credits: false
 
 
 ## Units
@@ -62,6 +63,11 @@ are as long as you model 1:1 scale.)
 It appear Unity do indeed use meters, but some exporters scale up by 100 by
 default. Unity's default import is therefore set to 0.01 which also appear to be
 the case with Cities: Skylines.
+
+# Style Guide
+
+This project follows the
+[GitHub Ruby styleguide](https://github.com/styleguide/ruby).
 
 # License
 
