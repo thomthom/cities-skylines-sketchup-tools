@@ -34,7 +34,7 @@ module TT::Plugins::CitiesSkylinesTools
     cmd_create_guide_grid = cmd
 
     cmd = UI::Command.new("Increase Subdivision Level") {
-      self.guide_grid_subdiv_level(INCREASE_SUBDIVISIONS)
+      self.guide_grid_subdiv_level(INCREASE)
     }
     cmd.tooltip = "Increase Subdivision Level"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_inc-16.png")
@@ -42,7 +42,7 @@ module TT::Plugins::CitiesSkylinesTools
     cmd_guide_grid_subdiv_level_inc = cmd
 
     cmd = UI::Command.new("Decrease Subdivision Level") {
-      self.guide_grid_subdiv_level(DECREASE_SUBDIVISIONS)
+      self.guide_grid_subdiv_level(DECREASE)
     }
     cmd.tooltip = "Decrease Subdivision Level"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_dec-16.png")
@@ -51,7 +51,7 @@ module TT::Plugins::CitiesSkylinesTools
 
 
     cmd = UI::Command.new("One Floor Up") {
-      self.guide_grid_height_level("Up")
+      self.guide_grid_height_level(INCREASE)
     }
     cmd.tooltip = "One Floor Up"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_level_inc-16.png")
@@ -59,7 +59,7 @@ module TT::Plugins::CitiesSkylinesTools
     cmd_guide_grid_height_level_up = cmd
 
     cmd = UI::Command.new("One Floor Down") {
-      self.guide_grid_height_level("Down")
+      self.guide_grid_height_level(DECREASE)
     }
     cmd.tooltip = "One Floor Down"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_level_dec-16.png")
