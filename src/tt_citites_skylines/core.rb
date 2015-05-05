@@ -25,8 +25,8 @@ module TT::Plugins::CitiesSkylinesTools
     cmd.large_icon = File.join(PATH_IMAGES, "export-24.png")
     cmd_export_asset = cmd
 
-    cmd = UI::Command.new("Create Guide Grid") {
-      self.guide_grid_config
+    cmd = UI::Command.new("Guide Grid") {
+      self.guide_grid_config(self.find_grid)
     }
     cmd.tooltip = "Guide Grid"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_cfg-16.png")

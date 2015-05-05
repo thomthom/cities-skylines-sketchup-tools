@@ -6,40 +6,46 @@
 #-------------------------------------------------------------------------------
 
 module TT::Plugins::CitiesSkylinesTools
-    
+
   SECTOR_SIZE = 8.m
+
   OBJECT_TYPE = "ObjectType".freeze
   TYPE_GUIDE_GRID = "GuideGrid".freeze
+
   GRID_CELLS_X = "GridCellsX".freeze
   GRID_CELLS_Y = "GridCellsY".freeze
   GRID_CELLS_SUBDIVS = "GridCellsSubDivs".freeze
+
   HEIGHT_GRID = "HeightGrid".freeze
+
   FLOORS = "Floors".freeze
   FIRST_FLOOR_HEIGHT = "FirstFloorHeight".freeze
   FLOOR_HEIGHT = "FloorHeight".freeze
-  
-  
-  def self.create_guide_grid(cells_x = nil, cells_y = nil, cells_subdivs = nil, height_grid = nil, floors = nil, first_floor_height = nil , floor_height = nil, group = nil)
-    cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4) unless cells_x
-    cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4) unless cells_y
-    cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3) unless cells_subdivs
-    # Height
-    height_grid = Sketchup.read_default(PLUGIN_ID, HEIGHT_GRID, "No") unless height_grid
-    floors = Sketchup.read_default(PLUGIN_ID, FLOORS, 5) unless floors
-    floor_height = Sketchup.read_default(PLUGIN_ID, FLOOR_HEIGHT, 3) unless floor_height
-    first_floor_height = Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5) unless first_floor_height
 
-    # Find group if possible else create a new one
+
+  def self.create_guide_grid(group = nil, options = nil)
+    puts "create_guide_grid"
     model = Sketchup.active_model
-    entities = Sketchup.active_model.entities
-    if (entities)
-      entities.each{|g|
-        group=g if g.get_attribute(PLUGIN_ID, OBJECT_TYPE) == TYPE_GUIDE_GRID
-      }
-    end
+
+    # Get default values if no spesific options are given.
+    options = self.grid_options(entity) if options.nil?
+    p options
+
+    cells_x             = options[:grid_x]
+    cells_y             = options[:grid_y]
+    cells_subdivs       = options[:grid_subdivs]
+    height_grid         = options[:height_grid]
+    floors              = options[:floors]
+    first_floor_height  = options[:first_floor_height]
+    floor_height        = options[:floor_height]
+
     model.start_operation("Guide Grid")
+
+    # Create a new group if we're not editing an existing one.
+    puts "Grid: #{group.inspect}"
     group ||= model.entities.add_group
     group.entities.clear! if group.entities.size > 0
+
     # Tag this group so we can find it later.
     group.set_attribute(PLUGIN_ID, OBJECT_TYPE, TYPE_GUIDE_GRID)
     group.set_attribute(PLUGIN_ID, GRID_CELLS_X, cells_x)
@@ -49,25 +55,29 @@ module TT::Plugins::CitiesSkylinesTools
     group.set_attribute(PLUGIN_ID, FLOORS, floors)
     group.set_attribute(PLUGIN_ID, FIRST_FLOOR_HEIGHT, first_floor_height)
     group.set_attribute(PLUGIN_ID, FLOOR_HEIGHT, floor_height)
-    
+
     grid_lines_x = cells_x + 1
     grid_lines_y = cells_y + 1
-    floors = 1 unless height_grid == "Yes"
-    floors = floors + 1 if height_grid == "Yes"
+
+    if height_grid == "Yes"
+      floor_planes = floors + 1
+    else
+      floor_planes = 1
+    end
 
     # Add guide points.
-    floors.times { |i|
+    floor_planes.times { |f|
       grid_lines_x.times { |x|
         grid_lines_y.times { |y|
-          group.entities.add_cpoint([x * SECTOR_SIZE, y * SECTOR_SIZE, (i-1) * floor_height.m + first_floor_height.m ]) unless i == 0
-          group.entities.add_cpoint([x * SECTOR_SIZE, y * SECTOR_SIZE, 0 ]) if i == 0
+          z = (f > 0) ? (f - 1) * floor_height + first_floor_height : 0
+          group.entities.add_cpoint([x * SECTOR_SIZE, y * SECTOR_SIZE, z])
         }
       }
       # Add guide lines.
       grid_lines_x.times { |x|
         grid_lines_y.times { |y|
-          point1 = Geom::Point3d.new(x * SECTOR_SIZE, y * SECTOR_SIZE, (i-1) * floor_height.m + first_floor_height.m ) unless i == 0
-          point1 = Geom::Point3d.new(x * SECTOR_SIZE, y * SECTOR_SIZE, 0) if i == 0
+          z = (f > 0) ? (f - 1) * floor_height + first_floor_height : 0
+          point1 = Geom::Point3d.new(x * SECTOR_SIZE, y * SECTOR_SIZE, z)
           point2 = point1.offset(X_AXIS, SECTOR_SIZE)
           point3 = point1.offset(Y_AXIS, SECTOR_SIZE)
           group.entities.add_cline(point1, point2) unless x == cells_x
@@ -75,7 +85,7 @@ module TT::Plugins::CitiesSkylinesTools
         }
       }
     }
-    
+
     # Add Base SubDivisions
     cells_subdivs_x = cells_x
     cells_subdivs_y = cells_y
@@ -91,11 +101,17 @@ module TT::Plugins::CitiesSkylinesTools
     # Create Points
     cells_subdivs_x.times { |x|
       cells_subdivs_y.times { |y|
-        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, 0 ]) if height_grid == "No" || floors <= 1
-        group.entities.add_cpoint([x * cells_subdivs_step, y * cells_subdivs_step, (floors - 2) * floor_height.m + first_floor_height.m ]) unless height_grid == "No" || floors <= 1
+        cx = x * cells_subdivs_step
+        cy = y * cells_subdivs_step
+        if height_grid == "No" || floor_planes < 0
+          cz = 0
+        else
+          cz = (floor_planes - 2) * floor_height + first_floor_height
+        end
+        group.entities.add_cpoint([cx, cy, cz])
       }
     }
-    
+
     # Center at origin.
     half_size_x = (SECTOR_SIZE * cells_x) / 2.0
     half_size_y = (SECTOR_SIZE * cells_y) / 2.0
@@ -112,64 +128,123 @@ module TT::Plugins::CitiesSkylinesTools
     ERROR_REPORTER.handle(error)
   end
 
+  def self.find_grid
+    return nil if Sketchup.active_model.nil?
+    Sketchup.active_model.entities.find { |entity|
+      object_type = entity.get_attribute(PLUGIN_ID, OBJECT_TYPE)
+      object_type.is_a?(String) && object_type == TYPE_GUIDE_GRID
+    }
+  end
+
+  def self.get_option(entity, key, default)
+    # Reads the option value from the given entity, or fall back to defaults.
+    value = nil
+    if entity
+      value = entity.get_attribute(PLUGIN_ID, key)
+    end
+    if value.nil?
+      begin
+        value = Sketchup.read_default(PLUGIN_ID, key, default)
+      rescue SyntaxError
+        # Hm... doesn't seem to be able to rescue this one...
+        puts "Failed to read saved default for: #{key}"
+        value = default
+      end
+      # Seems that SketchUp output SyntaxError without actually throwing
+      # it - then returning nil. Account for that here.
+      value = default if value.nil?
+    end
+    # Length's aren't saved properly in Sketchup.write_default. Make sure
+    # the returned values is a Length is the default is one.
+    if default.is_a?(Length)
+      value = value.to_l
+    end
+    value
+  end
+
+  def self.grid_options(entity)
+    options = {
+      :grid_x             => self.get_option(entity, GRID_CELLS_X, 4),
+      :grid_y             => self.get_option(entity, GRID_CELLS_Y, 4),
+      :grid_subdivs       => self.get_option(entity, GRID_CELLS_SUBDIVS, 3),
+      :height_grid        => self.get_option(entity, HEIGHT_GRID, "No"),
+      :floors             => self.get_option(entity, FLOORS, 5),
+      :floor_height       => self.get_option(entity, FLOOR_HEIGHT, 5.m),
+      :first_floor_height => self.get_option(entity, FIRST_FLOOR_HEIGHT, 4.5.m)
+    }
+    options
+  end
+
+  def self.save_option(key, value)
+    Sketchup.write_default(PLUGIN_ID, key, value)
+  end
+
+  def self.save_last_used_options(options)
+    self.save_option(GRID_CELLS_X,        options[:grid_x])
+    self.save_option(GRID_CELLS_Y,        options[:grid_y])
+    self.save_option(GRID_CELLS_SUBDIVS,  options[:grid_subdivs])
+    self.save_option(HEIGHT_GRID,         options[:height_grid])
+    self.save_option(FLOORS,              options[:floors])
+    self.save_option(FIRST_FLOOR_HEIGHT,  options[:first_floor_height].to_f)
+    self.save_option(FLOOR_HEIGHT,        options[:floor_height].to_f)
+  end
+
   def self.grid_context_menu(context_menu)
-    model = Sketchup.active_model
-    return false unless model.selection.size == 1
-    entity = model.selection[0]
-    object_type = entity.get_attribute(PLUGIN_ID, OBJECT_TYPE)
-    return false unless object_type.is_a?(String)
-    return false unless object_type == TYPE_GUIDE_GRID
-    grid_x = entity.get_attribute(PLUGIN_ID, GRID_CELLS_X)
-    grid_y = entity.get_attribute(PLUGIN_ID, GRID_CELLS_Y)
-    grid_subdivs = entity.get_attribute(PLUGIN_ID, GRID_CELLS_SUBDIVS)
-    height_grid = entity.get_attribute(PLUGIN_ID, HEIGHT_GRID)
-    floors = entity.get_attribute(PLUGIN_ID, FLOORS)
-    first_floor_height = entity.get_attribute(PLUGIN_ID, FIRST_FLOOR_HEIGHT)
-    floor_height = entity.get_attribute(PLUGIN_ID, FLOOR_HEIGHT)
-    return false if grid_x.nil? || grid_y.nil? || grid_subdivs.nil?
+    grid = self.find_grid
+    return false if grid.nil?
     context_menu.add_item("Edit Grid") {
-      self.guide_grid_config(grid_x, grid_y, grid_subdivs, height_grid, floors, first_floor_height, floor_height, entity)
+      self.guide_grid_config(grid)
     }
     true
   end
 
   # Grid Configuration Window
-  #---------------------------------------------------------------------------
-  def self.guide_grid_config(cells_x = nil, cells_y = nil, cells_subdivs = nil, height_grid = nil, floors = nil, first_floor_height = nil , floor_height = nil, group = nil)
-    prompts = ["Grid Width:", "Grid Depth:" , "Subdivisions:", "Height Grid:", "Floors:", "First Height:", "Other Height:"]
-    # Base
-    default_cell_x = cells_x || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
-    default_cell_y = cells_y || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
-    default_cell_subdivs = cells_subdivs || Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)
-    # Height
-    default_height_grid = height_grid || Sketchup.read_default(PLUGIN_ID, HEIGHT_GRID, "No")
-    default_floors = floors || Sketchup.read_default(PLUGIN_ID, FLOORS, 5)
-    default_floor_height = floor_height || Sketchup.read_default(PLUGIN_ID, FLOOR_HEIGHT, 3)
-    default_first_floor_height = first_floor_height || Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
-      
-    defaults = [default_cell_x, default_cell_y, default_cell_subdivs, default_height_grid, default_floors, default_first_floor_height, default_floor_height]
-    list = ["1|2|3|4|5|6|7|8", "1|2|3|4|5|6|7|8" , "0|1|2|3", "No|Yes", "", "", ""]
+  #
+  # @param [Sketchup::Group, Sketchup::ComponentInstance] entity
+  def self.guide_grid_config(entity)
+    options = self.grid_options(entity)
+    defaults = [
+      options[:grid_x],
+      options[:grid_y],
+      options[:grid_subdivs],
+      options[:height_grid],
+      options[:floors],
+      options[:first_floor_height],
+      options[:floor_height]
+    ]
+    prompts = [
+      "Grid Width:",
+      "Grid Depth:" ,
+      "Subdivisions:",
+      "Height Grid:",
+      "Floors:",
+      "First Height:",
+      "Other Height:"
+    ]
+    list = [
+      "1|2|3|4|5|6|7|8",
+      "1|2|3|4|5|6|7|8" ,
+      "0|1|2|3",
+      "No|Yes",
+      "",
+      "",
+      ""
+    ]
     input = UI.inputbox(prompts, defaults, list, "Guide Grid Config")
-    return false if input === false
-      
-    # Update Vars
-    cells_x = input[0]
-    cells_y = input[1]
-    cells_subdivs = input[2]
-    height_grid = input[3]
-    floors = input[4]
-    first_floor_height = input[5]
-    floor_height = input[6]
-      
-    # Rewrite Sketchup Defaults
-    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_X, cells_x)
-    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_Y, cells_y)
-    Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
-    Sketchup.write_default(PLUGIN_ID, HEIGHT_GRID, height_grid)
-    Sketchup.write_default(PLUGIN_ID, FLOORS, floors)
-    Sketchup.write_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, first_floor_height)
-    Sketchup.write_default(PLUGIN_ID, FLOOR_HEIGHT, floor_height)
-    self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group)
+    return false unless input
+
+    new_options = {
+      :grid_x             => input[0],
+      :grid_y             => input[1],
+      :grid_subdivs       => input[2],
+      :height_grid        => input[3],
+      :floors             => input[4],
+      :first_floor_height => input[5],
+      :floor_height       => input[6]
+    }
+
+    self.save_last_used_options(new_options)
+    self.create_guide_grid(entity, new_options)
     true
   end
 
@@ -185,7 +260,7 @@ module TT::Plugins::CitiesSkylinesTools
           group=g
           cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
           cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
-            
+
           if (dir === "Inc")
             cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)+1
             cells_subdivs = 4 if cells_subdivs > 4
