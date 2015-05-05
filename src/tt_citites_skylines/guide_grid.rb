@@ -69,7 +69,7 @@ module TT::Plugins::CitiesSkylinesTools
     grid_lines_y = cells_y + 1
 
     if height_grid == "Yes"
-      floor_planes = floors + 1
+      floor_planes = [floors + 1, 2].max
     else
       floor_planes = 1
     end
