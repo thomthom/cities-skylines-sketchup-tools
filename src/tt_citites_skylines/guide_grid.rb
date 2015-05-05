@@ -68,7 +68,7 @@ module TT::Plugins::CitiesSkylinesTools
     grid_lines_x = cells_x + 1
     grid_lines_y = cells_y + 1
 
-    if height_grid == "Yes"
+    if height_grid
       floor_planes = [floors + 1, 2].max
     else
       floor_planes = 1
@@ -112,7 +112,7 @@ module TT::Plugins::CitiesSkylinesTools
       cells_subdivs_y.times { |y|
         cx = x * cells_subdivs_step
         cy = y * cells_subdivs_step
-        if height_grid == "No" || floor_planes < 0
+        if height_grid == false || floor_planes < 0
           cz = 0
         else
           cz = (floor_planes - 2) * floor_height + first_floor_height
@@ -168,6 +168,11 @@ module TT::Plugins::CitiesSkylinesTools
     if default.is_a?(Length)
       value = value.to_l
     end
+    # If default value is a boolean, ensure the returned value also is a true
+    # boolean.
+    if default.is_a?(TrueClass) || default.is_a?(FalseClass)
+      value = value ? true : false
+    end
     value
   end
 
@@ -176,7 +181,7 @@ module TT::Plugins::CitiesSkylinesTools
       :grid_x             => self.get_option(entity, GRID_CELLS_X, 4),
       :grid_y             => self.get_option(entity, GRID_CELLS_Y, 4),
       :grid_subdivs       => self.get_option(entity, GRID_CELLS_SUBDIVS, 3),
-      :height_grid        => self.get_option(entity, HEIGHT_GRID, "No"),
+      :height_grid        => self.get_option(entity, HEIGHT_GRID, false),
       :floors             => self.get_option(entity, FLOORS, 5),
       :floor_height       => self.get_option(entity, FLOOR_HEIGHT, 5.m),
       :first_floor_height => self.get_option(entity, FIRST_FLOOR_HEIGHT, 4.5.m)
@@ -207,6 +212,14 @@ module TT::Plugins::CitiesSkylinesTools
     true
   end
 
+  def self.bool_to_string(bool)
+    bool ? "Yes" : "No"
+  end
+
+  def self.string_to_bool(string)
+    string == "No" ? false : true
+  end
+
   # Grid Configuration Window
   #
   # @param [Sketchup::Group, Sketchup::ComponentInstance] entity
@@ -216,7 +229,7 @@ module TT::Plugins::CitiesSkylinesTools
       options[:grid_x],
       options[:grid_y],
       options[:grid_subdivs],
-      options[:height_grid],
+      self.bool_to_string(options[:height_grid]),
       options[:floors],
       options[:first_floor_height],
       options[:floor_height]
@@ -246,7 +259,7 @@ module TT::Plugins::CitiesSkylinesTools
       :grid_x             => input[0],
       :grid_y             => input[1],
       :grid_subdivs       => input[2],
-      :height_grid        => input[3],
+      :height_grid        => self.string_to_bool(input[3]),
       :floors             => input[4],
       :first_floor_height => input[5],
       :floor_height       => input[6]
