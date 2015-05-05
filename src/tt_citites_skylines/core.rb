@@ -92,7 +92,7 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   # TT::Plugins::CitiesSkylinesTools.reload
-  def self.reload( tt_lib = false )
+  def self.reload
     original_verbose = $VERBOSE
     $VERBOSE = nil
     ruby_files = File.join(PATH, '**/*.{rb,rbs}')
