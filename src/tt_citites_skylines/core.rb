@@ -34,7 +34,7 @@ module TT::Plugins::CitiesSkylinesTools
     cmd_create_guide_grid = cmd
 
     cmd = UI::Command.new("Increase Subdivision Level") {
-      self.guide_grid_subdiv_level("Inc")
+      self.guide_grid_subdiv_level(INCREASE_SUBDIVISIONS)
     }
     cmd.tooltip = "Increase Subdivision Level"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_inc-16.png")
@@ -42,7 +42,7 @@ module TT::Plugins::CitiesSkylinesTools
     cmd_guide_grid_subdiv_level_inc = cmd
 
     cmd = UI::Command.new("Decrease Subdivision Level") {
-      self.guide_grid_subdiv_level("Dec")
+      self.guide_grid_subdiv_level(DECREASE_SUBDIVISIONS)
     }
     cmd.tooltip = "Decrease Subdivision Level"
     cmd.small_icon = File.join(PATH_IMAGES, "guide_grid_subdiv_dec-16.png")

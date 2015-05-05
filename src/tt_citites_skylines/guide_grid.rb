@@ -16,6 +16,12 @@ module TT::Plugins::CitiesSkylinesTools
   GRID_CELLS_Y = "GridCellsY".freeze
   GRID_CELLS_SUBDIVS = "GridCellsSubDivs".freeze
 
+  SUBDIVS_MIN = 0
+  SUBDIVS_MAX = 4
+
+  INCREASE_SUBDIVISIONS =  1
+  DECREASE_SUBDIVISIONS = -1
+
   HEIGHT_GRID = "HeightGrid".freeze
 
   FLOORS = "Floors".freeze
@@ -248,39 +254,17 @@ module TT::Plugins::CitiesSkylinesTools
     true
   end
 
-  def self.guide_grid_subdiv_level(dir = nil)
-    # Find group if possible else create a new one
-    model = Sketchup.active_model
-    entities = Sketchup.active_model.entities
-    found = false
-    if (entities)
-      entities.each{|g|
-        if g.get_attribute(PLUGIN_ID, OBJECT_TYPE) == TYPE_GUIDE_GRID
-          found=true
-          group=g
-          cells_x = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_X, 4)
-          cells_y = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_Y, 4)
+  def self.guide_grid_subdiv_level(adjustment)
+    grid = self.find_grid
+    options = self.grid_options(grid)
 
-          if (dir === "Inc")
-            cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)+1
-            cells_subdivs = 4 if cells_subdivs > 4
-            Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
-          else
-            cells_subdivs = Sketchup.read_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, 3)-1
-            cells_subdivs = 0 if cells_subdivs < 0
-            Sketchup.write_default(PLUGIN_ID, GRID_CELLS_SUBDIVS, cells_subdivs)
-          end
-          # Height
-          height_grid = Sketchup.read_default(PLUGIN_ID, HEIGHT_GRID, "No")
-          floors = Sketchup.read_default(PLUGIN_ID, FLOORS, 5)
-          floor_height = Sketchup.read_default(PLUGIN_ID, FLOOR_HEIGHT, 3)
-          first_floor_height = Sketchup.read_default(PLUGIN_ID, FIRST_FLOOR_HEIGHT, 4.5)
-          self.create_guide_grid(cells_x, cells_y, cells_subdivs, height_grid, floors, first_floor_height, floor_height, group)
-        end
-      }
-    end
-    false unless found === true
-    true
+    subdivs = options[:grid_subdivs] + adjustment
+    subdivs = [subdivs, SUBDIVS_MIN].max
+    subdivs = [subdivs, SUBDIVS_MAX].min
+    options[:grid_subdivs] = subdivs
+
+    self.save_last_used_options(options)
+    self.create_guide_grid(grid, options)
   end
 
   def self.guide_grid_height_level(dir = nil)
