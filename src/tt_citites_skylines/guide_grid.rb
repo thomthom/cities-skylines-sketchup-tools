@@ -33,12 +33,10 @@ module TT::Plugins::CitiesSkylinesTools
 
 
   def self.create_guide_grid(group = nil, options = nil)
-    puts "create_guide_grid"
     model = Sketchup.active_model
 
     # Get default values if no spesific options are given.
     options = self.grid_options(entity) if options.nil?
-    p options
 
     cells_x             = options[:grid_x]
     cells_y             = options[:grid_y]
@@ -51,7 +49,6 @@ module TT::Plugins::CitiesSkylinesTools
     model.start_operation("Guide Grid")
 
     # Create a new group if we're not editing an existing one.
-    puts "Grid: #{group.inspect}"
     group ||= model.entities.add_group
     group.entities.clear! if group.entities.size > 0
 
