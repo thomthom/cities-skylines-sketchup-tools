@@ -11,8 +11,8 @@ module TT::Plugins::CitiesSkylinesTools
   class ExportError < StandardError; end
 
 
-  require "tt_citites_skylines/exporters/fbx.rb"
-  require "tt_citites_skylines/exporters/dae.rb"
+  require "tt_cities_skylines/exporters/fbx.rb"
+  require "tt_cities_skylines/exporters/dae.rb"
 
 
   def self.export_asset

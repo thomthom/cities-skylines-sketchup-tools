@@ -10,8 +10,8 @@ module TT::Plugins::CitiesSkylinesTools
   PATH_IMAGES = File.join(PATH, "images").freeze
 
 
-  require "tt_citites_skylines/exporter.rb"
-  require "tt_citites_skylines/guide_grid.rb"
+  require "tt_cities_skylines/exporter.rb"
+  require "tt_cities_skylines/guide_grid.rb"
 
 
   unless file_loaded?(__FILE__)

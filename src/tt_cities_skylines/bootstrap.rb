@@ -45,7 +45,7 @@ module TT::Plugins::CitiesSkylinesTools
 
     ### ERROR HANDLER ### ------------------------------------------------------
 
-    require "tt_citites_skylines/third-party/error-reporter/error_reporter.rb"
+    require "tt_cities_skylines/third-party/error-reporter/error_reporter.rb"
 
     # Sketchup.write_default("TT_CitiesSkylines", "ErrorServer", "sketchup.thomthom.local")
     # Sketchup.write_default("TT_CitiesSkylines", "ErrorServer", "sketchup.thomthom.net")
@@ -64,7 +64,7 @@ module TT::Plugins::CitiesSkylinesTools
     ERROR_REPORTER = ErrorReporter.new(config)
 
     begin
-      require "tt_citites_skylines/core.rb"
+      require "tt_cities_skylines/core.rb"
     rescue Exception => error
       ERROR_REPORTER.handle(error)
     end
