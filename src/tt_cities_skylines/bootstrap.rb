@@ -63,6 +63,31 @@ module TT::Plugins::CitiesSkylinesTools
     }
     ERROR_REPORTER = ErrorReporter.new(config)
 
+    ### COMPATIBILITY ### ------------------------------------------------------
+
+    # Detect older versions which was had a typo in their filenames.
+    # This assumes the extension is installed in the Plugins folder and not
+    # loaded from some other location.
+    begin
+      legacy_root_rb = Sketchup.find_support_file("Plugins/tt_citites_skylines.rb")
+      if legacy_root_rb
+        puts "Removing old extension: #{legacy_root_rb}"
+        File.delete(legacy_root_rb)
+        # Prevent SketchUp from trying to load it.
+        $LOADED_FEATURES << legacy_root_rb
+      end
+      legacy_folder = Sketchup.find_support_file("Plugins/tt_citites_skylines")
+      if legacy_folder
+        puts "Removing old extension: #{legacy_folder}"
+        require 'fileutils'
+        FileUtils.rm_rf(legacy_folder)
+      end
+    rescue Exception => error
+      ERROR_REPORTER.handle(error)
+    end
+
+    ### LOAD EXTENSION ### -----------------------------------------------------
+
     begin
       require "tt_cities_skylines/core.rb"
     rescue Exception => error
