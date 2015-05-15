@@ -61,7 +61,7 @@ module TT::Plugins::CitiesSkylinesTools
 
   def self.export_temp_fbx
     rand_number = Time.now.to_i
-    temp_fbx_file = "tt_citites_#{rand_number}.fbx"
+    temp_fbx_file = "tt_cities_#{rand_number}.fbx"
     model = Sketchup.active_model
     model.export(temp_fbx_file)
     temp_fbx_file
