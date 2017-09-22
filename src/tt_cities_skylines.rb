@@ -27,7 +27,7 @@ module TT
   PLUGIN          = self
   PLUGIN_ID       = "TT_CitiesSkylines".freeze
   PLUGIN_NAME     = "Cities Skylines Tools".freeze
-  PLUGIN_VERSION  = "0.4.0".freeze
+  PLUGIN_VERSION  = "0.4.1".freeze
   PLUGIN_URL      = "http://software.thomthom.net/cities".freeze
 
 
@@ -38,7 +38,7 @@ module TT
     ex = SketchupExtension.new(PLUGIN_NAME, loader)
     ex.description = "Tools for creating Cities Skylines assets with SketchUp."
     ex.version     = PLUGIN_VERSION
-    ex.copyright   = "Thomas Thomassen © 2015"
+    ex.copyright   = "Thomas Thomassen © 2015-2017"
     ex.creator     = "Thomas Thomassen (thomas@thomthom.net)"
     @extension = ex
     Sketchup.register_extension(@extension, true)
