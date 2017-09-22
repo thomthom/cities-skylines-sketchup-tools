@@ -7,18 +7,24 @@
 
 module TT::Plugins::CitiesSkylinesTools
 
+  require "tt_cities_skylines/settings.rb"
+
+
   class PatchError < ExportError; end
 
 
   # Binary FBX file signature.
   BINARY_SIGNATURE = "Kaydara FBX Binary  ".freeze
 
+  # The numeric value for Meter units in FBX export settings.
+  FBX_UNIT_CENTIMETERS = 6
+
   # @note This should probably be wrapper up in a class interface.
   #
   # @param [String] target Destination FBX filename.
   def self.export_fbx_asset(target)
     # Export the intermediate FBX file.
-    self.set_fbx_exporter_settings
+    self.set_fbx_exporter_settings_legacy
     source = self.select_entities_for_export {
       self.export_temp_fbx
     }
@@ -37,7 +43,7 @@ module TT::Plugins::CitiesSkylinesTools
   end
 
 
-  def self.set_fbx_exporter_settings
+  def self.set_fbx_exporter_settings_legacy
     # Since the model.export method only have export arguments for COLLADA files
     # and not for any of the other exporters this has to be manually configured
     # for each system.
@@ -47,14 +53,10 @@ module TT::Plugins::CitiesSkylinesTools
       "ExportSeparateDisconnectedFaces"  => false,
       "ExportTextureMaps"                => false,
       "ExportTriangulatedFaces"          => true,
-      "ExportUnits"                      => 6,
+      "ExportUnits"                      => FBX_UNIT_CENTIMETERS,
       "SwapYZ"                           => true
     }
-    if Sketchup.platform == :platform_win
-      self.win32_write_settings("Fbx Exporter", settings)
-    else
-      self.osx_write_settings("Fbx Exporter", settings)
-    end
+    self.write_settings("Fbx Exporter", settings)
     nil
   end
 
@@ -63,7 +65,20 @@ module TT::Plugins::CitiesSkylinesTools
     rand_number = Time.now.to_i
     temp_fbx_file = "tt_cities_#{rand_number}.fbx"
     model = Sketchup.active_model
-    model.export(temp_fbx_file)
+    if Sketchup.version.to_i < 18
+      model.export(temp_fbx_file)
+    else
+      options = {
+        :doublesided_faces           => false,
+        :selectionset_only           => true,
+        :seperate_disconnected_faces => false,
+        :texture_maps                => false,
+        :triangulated_faces          => true,
+        :units                       => "cm",
+        :swap_yz                     => true
+      }
+      model.export(temp_fbx_file, options)
+    end
     temp_fbx_file
   end
 
